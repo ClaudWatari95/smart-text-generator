@@ -1,0 +1,253 @@
+<div id="input-section" class="w-full p-7">
+  <form class="flex w-full rounded-2xl custom-border px-4" id="prompt-form">
+    <input type="text" name="prompt-query" id="prompt-query" placeholder="Type your prompt here&hellip;" class="flex-initial grow py-4">
+    <button>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16.14 2.95998L7.11 5.95998C1.04 7.98998 1.04 11.3 7.11 13.32L9.79 14.21L10.68 16.89C12.7 22.96 16.02 22.96 18.04 16.89L21.05 7.86998C22.39 3.81998 20.19 1.60998 16.14 2.95998ZM16.46 8.33998L12.66 12.16C12.51 12.31 12.32 12.38 12.13 12.38C11.94 12.38 11.75 12.31 11.6 12.16C11.4605 12.0188 11.3823 11.8284 11.3823 11.63C11.3823 11.4316 11.4605 11.2411 11.6 11.1L15.4 7.27998C15.69 6.98998 16.17 6.98998 16.46 7.27998C16.75 7.56998 16.75 8.04998 16.46 8.33998Z" fill="#FF007A"/>
+      </svg>
+    </button>
+  </form>
+</div>
+</div>
+<div id="hidden" class="rounded-2xl py-4 px-24 fixed bottom-0 left-0 w-full custom-bottom-fixed hidden">
+  <div id="popupModal" class="text-center rounded-2xl custom-border px-4 py-7 relative bg-neutral-50">
+    <button class="text-rose-500 text-lg font-bold absolute top-0 right-0 close-button mr-4" id="close-button">x</button>
+    <div id="popup"></div>
+  </div>
+</div>
+<script>
+  const url = `${window.location.protocol}//${window.location.host}`;
+  const promptForm = document.querySelector('#prompt-form');
+  const promptInput = document.querySelector("input[name='prompt-query']");
+  const popup = document.querySelector('#popup');
+  const hidden = document.querySelector('#hidden');
+  const hiddenContainer = document.querySelector('#chat-screen');
+  const closeButton = document.querySelector('#close-button');
+  const chatContainer = document.querySelector('#chat-container');
+  const historyContainer = document.querySelector('#history');
+  const newChat = document.querySelector('#new-chat');
+
+  // chat history in menu
+  const  menuHistoryClasses = ['rounded-lg', 'no-border', 'text-stone-500', 'p-1', 'm-1', 'w-11/12', 'text-left', 'chat-title-btn', 'hover:text-stone-600'];
+  
+  // user chat bubble
+  const  promptContainerClasses = ['flex', 'justify-end', 'text-right', 'py-2', 'px-2'];
+  const  promptPClasses = ['bg-neutral-200', 'rounded-2xl', 'text-dark', 'fit-content', 'py-2', 'px-2', 'mw', 'text-left'];
+
+  // response chat bubble
+  const  responseContainerClasses = ['flex', 'justify-start', 'text-right', 'py-2', 'px-2'];
+  const  responsePClasses = ['bg-neutral-200', 'rounded-2xl', 'text-dark', 'fit-content', 'py-2', 'px-2', 'mw', 'text-left'];
+
+  const userIcon = `
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="10" fill="#FF007A"/>
+      <path d="M11.0114 26V14.3636H18.8523V16.392H13.4716V19.1648H18.4489V21.1932H13.4716V23.9716H18.875V26H11.0114ZM20.3651 16.392V14.3636H29.9219V16.392H26.3594V26H23.9276V16.392H20.3651Z" fill="white"/>
+    </svg>
+  `;
+  const assistantIcon = `
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="40" rx="10" fill="#FF007A"/>
+      <path d="M14.017 26H11.3807L15.3977 14.3636H18.5682L22.5795 26H19.9432L17.0284 17.0227H16.9375L14.017 26ZM13.8523 21.4261H20.0795V23.3466H13.8523V21.4261ZM26.4403 14.3636V26H23.9801V14.3636H26.4403Z" fill="white"/>
+    </svg>
+  `;
+  let chatId = '';
+  
+  const scrollToBottom = () => {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  };
+
+  const createElement = (forChatType, container, promptInnerContent, responseInnerContent) => {
+    if(forChatType === 'prompt') {
+      const promptContainerAsHtmlElement = document.createElement('div');
+      const promptPAsHtmlElement = document.createElement('p');
+      const promptIconAsHtmlElement = document.createElement('span');
+      promptIconAsHtmlElement.classList.add('ml-3');
+      promptIconAsHtmlElement.innerHTML = userIcon;
+
+      promptContainerAsHtmlElement.classList.add(...promptContainerClasses);
+      promptPAsHtmlElement.classList.add(...promptPClasses);
+      promptPAsHtmlElement.textContent = promptInnerContent;
+      promptContainerAsHtmlElement.appendChild(promptPAsHtmlElement);
+      promptContainerAsHtmlElement.appendChild(promptIconAsHtmlElement);
+      container.appendChild(promptContainerAsHtmlElement);
+    } else if(forChatType === 'response') { 
+      const responseContainerAsHtmlElement = document.createElement('div');
+      const responsePAsHtmlElement = document.createElement('p');
+      const assistantIconAsHtmlElement = document.createElement('span');
+      assistantIconAsHtmlElement.classList.add('mr-3');
+      assistantIconAsHtmlElement.innerHTML = assistantIcon;
+
+      responseContainerAsHtmlElement.classList.add(...responseContainerClasses);
+      responsePAsHtmlElement.classList.add(...responsePClasses);
+      responsePAsHtmlElement.innerHTML = responseInnerContent;
+      responseContainerAsHtmlElement.appendChild(assistantIconAsHtmlElement);
+      responseContainerAsHtmlElement.appendChild(responsePAsHtmlElement);
+      container.appendChild(responseContainerAsHtmlElement);
+    } else {
+      return 'invalid chat type passed';
+    }
+    scrollToBottom(); // this does not scroll to the bottom completely, but hangs somewhere in the middle
+    setTimeout(scrollToBottom, 100); // calling scrollToBottom twice because of above bug. 
+    /*
+    Screen has a very subtle but annoying jump animated while scrolling.
+    Leaving it now to finish other features first
+    */
+  };
+  const fetchingContent = `<div class="flex items-center loader">
+    <div class="typing-bubble"></div>
+      <div class="typing-bubble"></div>
+      <div class="typing-bubble"></div>
+    </div>
+  `;
+
+  const headers = {
+    'Authorization': localStorage.getItem('token'),
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
+
+  fetch(`${url}/chat.api`, { // verify token
+    method: 'GET',
+    headers: headers
+  }).then((res) => res.json()).then((data) => {
+    console.log(data);
+    if(data.error) {
+      return window.location.replace('/login');
+    } else {
+      hiddenContainer.classList.remove('hidden');
+    }
+  });
+
+  const hideMenuOnSmallScreen = () => {
+    const menuContainer = document.querySelector('#menu-container');
+    if (window.innerWidth <= 768) {
+      menuContainer.classList.add('hidden');
+    } else {
+      menuContainer.classList.remove('hidden');
+    }
+  };
+  window.addEventListener('load', hideMenuOnSmallScreen);
+  window.addEventListener('resize', hideMenuOnSmallScreen);
+  
+  const fetchChats = () => {
+    fetch(`${url}/user-chats`, {
+      method: 'GET',
+        headers: {... headers, 'call-next': true}
+   }).then((res) => res.json()).then((data) => {
+    data.titles.forEach((title) => {
+      const listItem = document.createElement('li');
+      const linkableItem = document.createElement('button');
+
+      linkableItem.classList.add(...menuHistoryClasses);
+      linkableItem.setAttribute('id', `chat-${data.titles.indexOf(title)}`);
+      if(document.querySelector(`#chat-${data.titles.indexOf(title)}`)) {
+        return false; // don't duplicate chat title if exists
+      }
+      linkableItem.textContent = title;
+      listItem.appendChild(linkableItem);
+      historyContainer.appendChild(listItem);
+    });
+   });
+  };
+
+  const sendPrompt = (event) => {
+    event.preventDefault();
+    hidden.classList.add('hidden');
+    promptInput.setAttribute('readonly', true);
+    const promptString = promptInput.value;
+    const chatTitle = promptString.length > 22 ? `${promptString.slice(0, 22)}...` : promptString;
+    chatId = chatId === '' ? chatTitle : chatId;
+    if(promptString === '') {
+      hidden.classList.remove('hidden');
+      return popup.textContent = 'Prompt cannot be empty';
+    }
+    promptForm.reset();
+    createElement('prompt', chatContainer, promptString, null);
+    createElement('response', chatContainer, null, fetchingContent);
+
+    fetch(`${url}/chat?chatId=${chatId}`, {
+      method: 'POST',
+      headers: {... headers, 'call-next': true},
+      body: JSON.stringify({
+        prompt: promptString
+      })
+    }).then((res) => res.json()).then((data) => {
+      const loader = document.querySelectorAll('.loader')[0];
+      const loaderParentParagraph = loader.parentNode;
+      const loaderParentDiv = loaderParentParagraph.parentNode;
+      loaderParentDiv.remove();
+      if(data.error) {
+        popup.textContent = data.error.error ? data.error.error : data.error.message;
+        hidden.classList.remove('hidden');
+      } else if(data.result) {
+        createElement('response', chatContainer, null, data.result);
+        fetchChats();
+        scrollToBottom();
+      }
+     promptInput.removeAttribute('readonly');
+    }).catch((error) => {
+      console.log(error);
+    })
+  };
+
+  const closeMessage = () => {
+    hidden.classList.add('hidden');
+  };
+
+  const removeActiveClass = (element) => {
+    if(element) {
+      element.classList.remove('active');
+      element.classList.remove('text-stone-950');
+      element.classList.add('text-stone-500')
+    }
+  };
+
+  const selectChatContent = () => {
+    const buttons = document.querySelectorAll('.chat-title-btn');
+    buttons.forEach((button) => {
+      button.addEventListener('click', (e) => {
+      const previousSelected = document.querySelectorAll('.active')[0];
+      removeActiveClass(previousSelected);
+
+      button.classList.remove('text-stone-500');
+      button.classList.add('text-stone-950');
+      button.classList.add('active');
+        chatId = button.textContent;
+        chatContainer.innerHTML = ``;
+        fetch(`${url}/user-chats/${button.textContent}`, {
+          method: 'GET',
+          headers: {... headers, 'call-next': true},
+        }).then((res) => res.json()).then((data) => {
+          data.existingChat.content.forEach((item) => {
+            if(item.prompt) {
+              createElement('prompt', chatContainer, item.prompt, null);
+            } else if(item.response) {
+              createElement('response', chatContainer, null, item.response);
+            }
+          });
+        });
+      });
+    });
+  };
+
+  /*
+  selectChatContent function has a problem if you click the title after sending a prompt.
+
+  Please reload page to be able to use click event of new titles
+  */
+
+  const initNewChat = () => {
+    promptForm.reset();
+    chatId = '';
+    chatContainer.innerHTML = ``;
+    const previousSelected = document.querySelectorAll('.active')[0];
+    removeActiveClass(previousSelected);
+  };
+
+  fetchChats();
+  setTimeout(selectChatContent, 1000); // attaching event listener using timeout as a quick workaround, to account for dynamically injected content
+
+  promptForm.addEventListener('submit', sendPrompt);
+  closeButton.addEventListener('click', closeMessage);
+  newChat.addEventListener('click', initNewChat);
+</script>

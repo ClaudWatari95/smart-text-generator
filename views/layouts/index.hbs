@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style type="text/tailwindcss">
+      @layer utilities {
+        :root {
+          --gray: rgb(164, 169, 191, 1);
+          --dark-gray: rgba(45, 49, 66, 1);
+          --green: rgba(70, 180, 85, 1);
+        }
+        input:-webkit-autofill {
+          -webkit-text-fill-color: inherit;
+          -webkit-box-shadow: 0 0 0px 1000px white inset;
+        }
+        .ff007a {
+          color: rgba(255, 0, 122, 1);
+        }
+        .lh-small {
+          line-height: 140%;
+        }
+        .hr {
+          width: 100%;
+          background: var(--gray);
+          min-height: 1px;
+          padding: .1px;
+          margin: 1rem auto;
+        }
+        .custom-border {
+          border: 1px solid var(--gray);
+        }
+        .no-border {
+          border: none;
+        }
+        input:focus {
+          outline: transparent;
+        }
+        .dark-gray {
+          color: var(--dark-gray);
+        }
+        .submit {
+          background-color: var(--green);
+          border: 1px solid var(--green);
+          color: rgb(255, 255, 255);
+        }
+        .hidden {
+          display: none;
+        }
+        .custom-bottom-fixed {
+          margin: 0 auto 8rem auto;
+          text-align: center;
+        }
+        .fit-content {
+          width: fit-content;
+        }
+        .neg-mt {
+          margin-top: -7rem;
+        }
+        .custom-max-min-dim {
+          max-width: 400px;
+          min-width: 200px;
+        }
+        .mw {
+          max-width: 65%;
+        }
+        .typing-bubble {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background-color: var(--gray);
+          margin-right: 5px;
+          animation: typing-animation 1s infinite;
+        }
+        @keyframes typing-animation {
+          0% {
+            opacity: 0.3;
+          }
+          
+          50% {
+            opacity: 1;
+          }
+          
+          100% {
+            opacity: 0.3;
+          }
+        }
+      }
+    </style>
+    <title>Smart Text Generator</title>
+  </head>
+  <body class="overflow-hidden">
+    {{#if noSession}}
+      <div class="flex items-center justify-center h-screen">
+        <div class="w-6/12">
+          <div class="flex w-full">
+            {{> header}}
+          </div>
+          <div class="my-7"></div>
+          {{#if signup}}
+            {{> signup-form}}
+          {{ else if login }}
+            {{> login-form}}
+          {{ else if resetPassword }}
+            {{> reset-password-form}}
+          {{/if}}
+        </div>
+      </div>
+    {{else}}
+      <div id="chat-screen" class="flex h-screen flex-row hidden">
+        <div class="flex flex-col bg-neutral custom-border custom-max-min-dim justify-between" id="menu-container">
+          {{> menu}}
+        </div>
+        <div class="p-4 grow">
+          <div class="flex w-full">
+            {{> header}}
+          </div>
+          <div class="hr"></div>
+          <div class="flex flex-col justify-between h-screen neg-mt pt-36">
+            <div class="py-4 overflow-auto" id="chat-container"></div>
+            {{> prompt}}
+          </div>
+        </div>
+      </div>
+    {{/if}}
+  </body>
+</html>

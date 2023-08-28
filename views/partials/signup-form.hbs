@@ -1,0 +1,64 @@
+<p class="font-bold">Sign up</p>
+<form class="w-full mx-auto my-7" id="signup-form">
+  {{> auth-input name="email" id="email" type="email"}}
+  {{> auth-input name="fullname" id="full-name" type="text"}}
+  {{> auth-input name="password" id="password" type="password"}}
+  <div class="flex justify-between">        
+    <button class="submit px-5 py-2 my-2 rounded-lg">Sign Up</button>
+    <a href="/login" class="dark-gray py-2 underline">Log In</a>
+  </div>
+</form>
+<script>
+  const url = `${window.location.protocol}//${window.location.host}`;
+  const form = document.querySelector('#signup-form');
+  const signUpFunction = (e) => {
+    e.preventDefault();
+    const emailInput = document.querySelector('#email');
+    const fullNameInput = document.querySelector('#full-name');
+    const passwordInput = document.querySelector('#password');
+    
+    fetch(`${url}/signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        email: emailInput.value,
+        fullname: fullNameInput.value,
+        password: passwordInput.value
+      })
+    }).then((res) => res.json()).then((data) => {
+      const removeElement = (element) => {
+        form.removeChild(element);
+      }
+      const errorMessageTagExists = document.querySelector('#err-msg');
+      if(errorMessageTagExists) {
+        removeElement(errorMessageTagExists);
+      } // remove error message if exists to prevent multiple appendChild calls
+      if(data.error) {        
+        const errorMessageTag = document.createElement('p');
+        errorMessageTag.setAttribute('class', 'text-red-600');
+        errorMessageTag.setAttribute('id', 'err-msg');
+        errorMessageTag.textContent = data.error.message;
+        form.appendChild(errorMessageTag);
+      } else if(data.success) {
+        const successMessageTag = document.createElement('p');
+        successMessageTag.setAttribute('class', 'text-green-600');
+        successMessageTag.textContent = data.success.message;
+        form.appendChild(successMessageTag);
+        localStorage.setItem('token', data.success.token);
+        window.location.replace('/chat');
+      } else {
+        return 'Invalid data object';
+      }
+    });
+  }
+   // function to strip hyphen from full-name label
+  const stripHyphen = () => {
+    const label = document.querySelector("label[for='full-name']");
+    label.textContent = `${label.textContent.split('-')[0]} ${label.textContent.split('-')[1]}`;
+  };
+  stripHyphen();
+  form.addEventListener('submit', signUpFunction);
+</script>

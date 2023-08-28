@@ -1,0 +1,57 @@
+<p class="font-bold">Please log in to continue</p>
+<form class="w-full mx-auto my-7" id="login-form">
+  {{> auth-input name="email" id="email" type="email"}}
+  {{> auth-input name="password" id="password" type="password"}}
+  <div class="flex justify-between">        
+    <button class="submit px-5 py-2 my-2 rounded-lg">Log in</button>
+    <a href="/signup" class="dark-gray py-2 underline">Sign Up</a>
+  </div>
+  <a href="/reset-password" class="dark-gray py-2 text-xs">Forgot password</a>
+  <div class="my-4"></div>
+</form>
+<script>
+  const url = `${window.location.protocol}//${window.location.host}`;
+  const form = document.querySelector('#login-form');
+  const loginFunction = (e) => {
+    e.preventDefault();
+    const emailInput = document.querySelector('#email');
+    const passwordInput = document.querySelector('#password');
+    
+    fetch(`${url}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        email: emailInput.value,
+        password: passwordInput.value
+      })
+    }).then((res) => res.json()).then((data) => {
+      const removeElement = (element) => {
+        form.removeChild(element);
+      }
+      const errorMessageTagExists = document.querySelector('#err-msg');
+      if(errorMessageTagExists) {
+        removeElement(errorMessageTagExists);
+      } // remove error message if exists to prevent multiple appendChild calls
+      if(data.error) {        
+        const errorMessageTag = document.createElement('p');
+        errorMessageTag.setAttribute('class', 'text-red-600');
+        errorMessageTag.setAttribute('id', 'err-msg');
+        errorMessageTag.textContent = data.error.message;
+        form.appendChild(errorMessageTag);
+      } else if(data.success) {
+        const successMessageTag = document.createElement('p');
+        successMessageTag.setAttribute('class', 'text-green-600');
+        successMessageTag.textContent = data.success.message;
+        form.appendChild(successMessageTag);
+        localStorage.setItem('token', data.success.token);
+        window.location.replace('/chat');
+      } else {
+        return 'Invalid data object';
+      }
+    });
+  }
+  form.addEventListener('submit', loginFunction);
+</script>
