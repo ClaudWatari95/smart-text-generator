@@ -9,7 +9,7 @@ I have used NodeJs for this project, with handlebarsJs for the client side templ
 
 
 ### Project setup
-1) After extracting the files and folders, open a new terminal in the root directory (**OPENAI-SMART-TEXT-GENERATOR** folder).
+1) After extracting the files and folders, open a new terminal in the root directory.
 
 2) Run the following commands:
     ``` npm install ```
@@ -24,8 +24,8 @@ I have used NodeJs for this project, with handlebarsJs for the client side templ
 
 4) Open the .env file you just created and enter as below:
     ```
-    openai_key=
-    secret_key=
+    OPENAI_KEY=
+    SECRET_KEY=
 
     ```
 
@@ -33,8 +33,8 @@ I have used NodeJs for this project, with handlebarsJs for the client side templ
 
 6) Repeat step 5 for the secret_key variable. The file should look something like below:
 
-    openai_key=sk-randomalphanumericcharatersfromyouropenaiaccount
-    secret_key=yoursecretstringforsigningandverifyingtokens
+    OPENAI_KEY=sk-randomalphanumericcharatersfromyouropenaiaccount
+    SECRET_KEY=yoursecretstringforsigningandverifyingtokens
     
 I have used nodemon to watch for updates to the codebase and auto-restart the server instead of just exiting and restarting manually.
 If you need to start manually instead, you can navigate to *package.json* and edit the start scripts as below (line: 7)
@@ -47,9 +47,6 @@ If you need to start manually instead, you can navigate to *package.json* and ed
 
  There is no database model I am using, instead I have set up the project to use json files using node filesystem (fs) to create and read list items as a placeholder database. This can also be edited manually as well.
 
- This is not good security, but as it was not included in the original specifications, I thought I couldjust do something additional, just for the UX.
-
- The reason I decided to do this was to go above and beyond, especially for authentication (login and signup). I also created an additional screen for reseting passwords, in case such actions may be needed on the client side, instead of coming back to the codebase or the json file. Design is implemented similarly to other authentication screens.
 
 
 ### Potential bugs
@@ -58,7 +55,7 @@ I have found I am experiencing the issue described [here](https://github.com/ope
 
 Chat history is only available on bigger resolutions (768px and above). I didn't yet add an icon on smaller screens to toggle the menu due to time constraints.
 
-I have also not made the site fully responsive, only using default classes, again, due to time constraints.
+I have also not made the site fully responsive, only using default classes.
 
 
 
@@ -69,5 +66,3 @@ It was my first time working with both handlebars and tailwind, not to mention o
 My background has been mostly ejs and bootstrap respectively.
 I have learnt a lot building this project, I already feel like a pro with express-handlebars.
 
-
-I have added comments where needed, but I have also written self documenting code, especially with variable naming for easier understanding.
