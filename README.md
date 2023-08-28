@@ -1,7 +1,7 @@
 ## Project Background
 
 The idea is to build a GPT based chatbot using the [OpenAI API](https://platform.openai.com/docs/introduction).
-The views template is built from a figma design provided by Distributed.
+The views template is built from a figma design provided by **********.
 
 Users can send prompts to the AI model and get a response in the chat area.
 
